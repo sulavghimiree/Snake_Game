@@ -19,7 +19,7 @@ const UserProfile = ({ user, authToken, onLogout }) => {
 
     setLoading(true);
     try {
-  const response = await fetch(`${API_BASE}/api/auth/profile/`, {
+  const response = await fetch(`${API_BASE}/api/auth/profile/?fields=id,username,best_score,total_games_played,is_online,date_joined,profile_photo_url`, {
         headers: {
           'Authorization': `Token ${authToken}`,
           'Content-Type': 'application/json',

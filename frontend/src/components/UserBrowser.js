@@ -16,7 +16,7 @@ const UserBrowser = ({ onClose, onViewProfile, currentUser }) => {
     try {
       setLoading(true);
       const token = localStorage.getItem('authToken');
-  const response = await fetch(`${API_BASE}/api/users/`, {
+  const response = await fetch(`${API_BASE}/api/users/?fields=id,username,best_score,total_games_played,profile_photo_url,is_online,location`, {
         headers: {
           'Authorization': `Token ${token}`,
         },

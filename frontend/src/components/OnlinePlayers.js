@@ -17,7 +17,8 @@ const OnlinePlayers = ({ authToken, currentUser }) => {
     }
 
     try {
-  const response = await fetch(`${API_BASE}/api/online-players/`, {
+  const url = `${API_BASE}/api/online-players/?fields=id,username,best_score,total_games_played`;
+  const response = await fetch(url, {
         headers: {
           'Authorization': `Token ${authToken}`,
           'Content-Type': 'application/json',
@@ -64,8 +65,8 @@ const OnlinePlayers = ({ authToken, currentUser }) => {
       sendPing();
       
       // Set up intervals
-      const pingInterval = setInterval(sendPing, 30000); // Ping every 30 seconds
-      const fetchInterval = setInterval(fetchOnlinePlayers, 15000); // Fetch online players every 15 seconds
+  const pingInterval = setInterval(sendPing, 45000); // Ping every 45 seconds
+  const fetchInterval = setInterval(fetchOnlinePlayers, 25000); // Fetch online players every 25 seconds
 
       return () => {
         clearInterval(pingInterval);

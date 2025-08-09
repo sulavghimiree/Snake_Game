@@ -4,6 +4,28 @@ from django.contrib.auth.password_validation import validate_password
 from .models import User, GameSession, HighScore, OnlinePlayer
 
 
+class SparseFieldsMixin:
+    """Allow selecting a subset of fields via context['only_fields'] or request ?fields=a,b"""
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        only_fields = None
+        # Prefer explicit context
+        ctx_fields = (self.context or {}).get('only_fields') if hasattr(self, 'context') else None
+        if ctx_fields:
+            only_fields = set(ctx_fields)
+        else:
+            request = (self.context or {}).get('request') if hasattr(self, 'context') else None
+            if request:
+                param = request.query_params.get('fields')
+                if param:
+                    only_fields = set([f.strip() for f in param.split(',') if f.strip()])
+        if only_fields:
+            allowed = set(only_fields)
+            existing = set(getattr(self.Meta, 'fields', []))
+            # Intersect with defined fields only
+            self.fields = {k: v for k, v in self.fields.items() if k in allowed and k in existing}
+
+
 class UserRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, validators=[validate_password])
     password2 = serializers.CharField(write_only=True)
@@ -53,7 +75,7 @@ class UserLoginSerializer(serializers.Serializer):
             raise serializers.ValidationError('Must include username and password.')
 
 
-class UserProfileSerializer(serializers.ModelSerializer):
+class UserProfileSerializer(SparseFieldsMixin, serializers.ModelSerializer):
     profile_photo_url = serializers.SerializerMethodField()
     join_date_formatted = serializers.SerializerMethodField()
     
@@ -84,7 +106,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
         return obj.date_joined.strftime('%B %Y') if obj.date_joined else None
 
 
-class OnlinePlayerSerializer(serializers.ModelSerializer):
+class OnlinePlayerSerializer(SparseFieldsMixin, serializers.ModelSerializer):
     id = serializers.IntegerField(source='user.id', read_only=True)
     username = serializers.CharField(source='user.username', read_only=True)
     best_score = serializers.IntegerField(source='user.best_score', read_only=True)
@@ -104,7 +126,7 @@ class OnlinePlayerSerializer(serializers.ModelSerializer):
         return None
 
 
-class GameSessionSerializer(serializers.ModelSerializer):
+class GameSessionSerializer(SparseFieldsMixin, serializers.ModelSerializer):
     username = serializers.CharField(source='user.username', read_only=True)
 
     class Meta:
@@ -112,7 +134,7 @@ class GameSessionSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'score', 'game_data', 'created_at', 'updated_at', 'is_active']
 
 
-class HighScoreSerializer(serializers.ModelSerializer):
+class HighScoreSerializer(SparseFieldsMixin, serializers.ModelSerializer):
     username = serializers.CharField(source='user.username', read_only=True)
     profile_photo_url = serializers.SerializerMethodField()
     user_id = serializers.IntegerField(source='user.id', read_only=True)

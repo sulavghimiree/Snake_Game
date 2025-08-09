@@ -92,7 +92,11 @@ export const gameAPI = {
   getHighScores: async (token = null) => {
     try {
       const headers = token ? getAuthHeaders(token) : {};
-      const response = await apiClient.get('/games/high_scores/', { headers });
+      // Request minimal fields; backend ignores unknown params safely
+      const response = await apiClient.get('/games/high_scores/', {
+        headers,
+        params: { fields: 'user_id,username,score,profile_photo_url' }
+      });
       return response.data;
     } catch (error) {
       console.warn('Failed to fetch high scores:', error.message);

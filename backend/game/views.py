@@ -1,6 +1,8 @@
 from django.shortcuts import render
 from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework.views import APIView
@@ -98,11 +100,15 @@ class UserProfileView(APIView):
 class OnlinePlayersView(APIView):
     permission_classes = [permissions.AllowAny]
 
+    @method_decorator(cache_page(5))
     def get(self, request):
         # Only return online players if user is authenticated
         if request.user.is_authenticated:
             online_players = OnlinePlayer.get_online_players()
-            serializer = OnlinePlayerSerializer(online_players, many=True)
+            # Minimal fields by default to reduce payload; override with ?fields=id,username,...
+            default_fields = ['id', 'username', 'best_score', 'total_games_played']
+            context = {'request': request, 'only_fields': default_fields}
+            serializer = OnlinePlayerSerializer(online_players, many=True, context=context)
             return Response(serializer.data)
         else:
             # Return empty list for unauthenticated users
@@ -250,6 +256,7 @@ class GameViewSet(viewsets.ModelViewSet):
             }, status=status.HTTP_404_NOT_FOUND)
 
     @action(detail=False, methods=['get'], permission_classes=[permissions.AllowAny])
+    @method_decorator(cache_page(10))
     def high_scores(self, request):
         """Get top 10 high scores - one per user"""
         # Get highest score for each user, ordered by score descending
@@ -270,7 +277,20 @@ class GameViewSet(viewsets.ModelViewSet):
             if high_score:
                 high_scores.append(high_score)
         
-        serializer = HighScoreSerializer(high_scores, many=True, context={'request': request})
+        # Minimal fields for leaderboard
+        default_fields = ['user_id', 'username', 'score', 'profile_photo_url']
+        serializer = HighScoreSerializer(high_scores, many=True, context={'request': request, 'only_fields': default_fields})
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['get'])
+    def me_summary(self, request):
+        """Lightweight user summary for header widgets"""
+        fields = request.query_params.get('fields')
+        default_fields = ['id', 'username', 'best_score', 'total_games_played', 'is_online']
+        context = {'request': request}
+        if not fields:
+            context['only_fields'] = default_fields
+        serializer = UserProfileSerializer(request.user, context=context)
         return Response(serializer.data)
 
     @action(detail=False, methods=['get'])
