@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import ProfileModal from './ProfileModal';
 
+const API_BASE = (process.env.REACT_APP_API_URL || 'http://localhost:8000').replace(/\/+$/, '');
+
 const OnlinePlayers = ({ authToken, currentUser }) => {
   const [onlinePlayers, setOnlinePlayers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -15,7 +17,7 @@ const OnlinePlayers = ({ authToken, currentUser }) => {
     }
 
     try {
-      const response = await fetch('http://localhost:8000/api/online-players/', {
+  const response = await fetch(`${API_BASE}/api/online-players/`, {
         headers: {
           'Authorization': `Token ${authToken}`,
           'Content-Type': 'application/json',
@@ -42,7 +44,7 @@ const OnlinePlayers = ({ authToken, currentUser }) => {
     if (!authToken) return;
 
     try {
-      await fetch('http://localhost:8000/api/ping/', {
+  await fetch(`${API_BASE}/api/ping/`, {
         method: 'POST',
         headers: {
           'Authorization': `Token ${authToken}`,

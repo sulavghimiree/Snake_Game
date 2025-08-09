@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
+const API_BASE = (process.env.REACT_APP_API_URL || 'http://localhost:8000').replace(/\/+$/, '');
+
 const UserBrowser = ({ onClose, onViewProfile, currentUser }) => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -14,7 +16,7 @@ const UserBrowser = ({ onClose, onViewProfile, currentUser }) => {
     try {
       setLoading(true);
       const token = localStorage.getItem('authToken');
-      const response = await fetch('http://localhost:8000/api/users/', {
+  const response = await fetch(`${API_BASE}/api/users/`, {
         headers: {
           'Authorization': `Token ${token}`,
         },

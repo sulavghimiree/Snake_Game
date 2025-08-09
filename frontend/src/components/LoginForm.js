@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import GoogleAuthButton from './GoogleAuthButton';
 
+const API_BASE = (process.env.REACT_APP_API_URL || 'http://localhost:8000').replace(/\/+$/, '');
+
 const LoginForm = ({ onLogin, onSwitchToSignup }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -18,7 +20,7 @@ const LoginForm = ({ onLogin, onSwitchToSignup }) => {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:8000/api/auth/login/', {
+      const response = await fetch(`${API_BASE}/api/auth/login/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

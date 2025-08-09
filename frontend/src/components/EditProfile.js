@@ -1,5 +1,7 @@
 import React, { useState, useRef } from 'react';
 
+const API_BASE = (process.env.REACT_APP_API_URL || 'http://localhost:8000').replace(/\/+$/, '');
+
 const EditProfile = ({ user, onClose, onSave }) => {
   const [formData, setFormData] = useState({
     bio: user.bio || '',
@@ -52,7 +54,7 @@ const EditProfile = ({ user, onClose, onSave }) => {
       const token = localStorage.getItem('authToken');
 
       // Update profile data
-      const profileResponse = await fetch('http://localhost:8000/api/auth/profile/', {
+  const profileResponse = await fetch(`${API_BASE}/api/auth/profile/`, {
         method: 'PUT',
         headers: {
           'Authorization': `Token ${token}`,
@@ -72,7 +74,7 @@ const EditProfile = ({ user, onClose, onSave }) => {
         const photoFormData = new FormData();
         photoFormData.append('profile_photo', profilePhoto);
 
-        const photoResponse = await fetch('http://localhost:8000/api/profile/photo/upload/', {
+  const photoResponse = await fetch(`${API_BASE}/api/profile/photo/upload/`, {
           method: 'POST',
           headers: {
             'Authorization': `Token ${token}`,

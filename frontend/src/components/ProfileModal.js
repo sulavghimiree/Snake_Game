@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
+const API_BASE = (process.env.REACT_APP_API_URL || 'http://localhost:8000').replace(/\/+$/, '');
+
 const ProfileModal = ({ userId, currentUser, onClose, onEditProfile }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -14,8 +16,8 @@ const ProfileModal = ({ userId, currentUser, onClose, onEditProfile }) => {
       setLoading(true);
       const token = localStorage.getItem('authToken');
       const url = userId 
-        ? `http://localhost:8000/api/profile/${userId}/`
-        : 'http://localhost:8000/api/auth/profile/';
+        ? `${API_BASE}/api/profile/${userId}/`
+        : `${API_BASE}/api/auth/profile/`;
       
       const response = await fetch(url, {
         headers: {

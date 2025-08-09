@@ -1,12 +1,14 @@
 import React, { useEffect, useRef, useCallback } from 'react';
 
+const API_BASE = (process.env.REACT_APP_API_URL || 'http://localhost:8000').replace(/\/+$/, '');
+
 const GoogleAuthButton = ({ onSuccess, onError, text = "Continue with Google" }) => {
   const buttonRef = useRef(null);
 
   const handleCredentialResponse = useCallback(async (response) => {
     try {
       // Send the Google credential to our backend
-      const backendResponse = await fetch('http://localhost:8000/api/auth/google/', {
+  const backendResponse = await fetch(`${API_BASE}/api/auth/google/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

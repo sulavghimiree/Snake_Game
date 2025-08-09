@@ -3,6 +3,8 @@ import ProfileModal from './ProfileModal';
 import EditProfile from './EditProfile';
 import UserBrowser from './UserBrowser';
 
+const API_BASE = (process.env.REACT_APP_API_URL || 'http://localhost:8000').replace(/\/+$/, '');
+
 const UserProfile = ({ user, authToken, onLogout }) => {
   const [profile, setProfile] = useState(user);
   const [loading, setLoading] = useState(false);
@@ -17,7 +19,7 @@ const UserProfile = ({ user, authToken, onLogout }) => {
 
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:8000/api/auth/profile/', {
+  const response = await fetch(`${API_BASE}/api/auth/profile/`, {
         headers: {
           'Authorization': `Token ${authToken}`,
           'Content-Type': 'application/json',
@@ -43,7 +45,7 @@ const UserProfile = ({ user, authToken, onLogout }) => {
 
   const handleLogout = async () => {
     try {
-      await fetch('http://localhost:8000/api/auth/logout/', {
+  await fetch(`${API_BASE}/api/auth/logout/`, {
         method: 'POST',
         headers: {
           'Authorization': `Token ${authToken}`,
